@@ -31,7 +31,7 @@ function Header() {
                     <img
                         src={logo}
                         alt="DecorOnDemand - Fulfilling Your Decor Demands"
-                        className="h-12 w-auto object-contain"
+                        className="h-20 p-0 w-auto object-contain"
                     />
         </Link>
 

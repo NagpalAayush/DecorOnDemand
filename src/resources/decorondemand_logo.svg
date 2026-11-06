@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="430" viewBox="0 0 700 430" role="img" aria-labelledby="title desc">
+  <title id="title">DecorOnDemand logo</title>
+  <desc id="desc">A deep-purple decorative D with coral curtains, gold string lights, a gold bow and sparkle, above the DecorOnDemand wordmark and the slogan Fulfilling Your Decor Demands.</desc>
+
+  <defs>
+    <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#57206F"/>
+      <stop offset="1" stop-color="#351044"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FF8A70"/>
+      <stop offset="1" stop-color="#F45F4E"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F5D17A"/>
+      <stop offset="1" stop-color="#C9963D"/>
+    </linearGradient>
+    <clipPath id="dClip">
+      <path d="M205 45 H338 C401 45 443 87 443 150 C443 213 401 255 338 255 H205 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- Decorative letter D -->
+  <path d="M205 45 H338 C401 45 443 87 443 150 C443 213 401 255 338 255 H205 Z" fill="url(#purple)"/>
+
+  <g clip-path="url(#dClip)">
+    <!-- subtle interior glow -->
+    <path d="M222 220 C285 177 363 176 442 205 V260 H205 Z" fill="#6B347A" opacity=".28"/>
+
+    <!-- Draped coral curtain -->
+    <path d="M205 45 H340 C327 75 316 103 297 130 C276 159 245 181 205 191 Z" fill="url(#coral)"/>
+    <path d="M205 45 H326 C312 80 301 111 280 137 C259 163 234 179 205 186 Z" fill="#FF8069" opacity=".65"/>
+    <path d="M226 55 C218 93 209 119 191 139" fill="none" stroke="#C94E50" stroke-width="3" stroke-linecap="round"/>
+    <path d="M270 57 C257 97 244 127 218 151" fill="none" stroke="#C94E50" stroke-width="3" stroke-linecap="round"/>
+    <path d="M315 55 C300 91 284 119 257 143" fill="none" stroke="#C94E50" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- String lights -->
+    <path d="M330 79 C360 93 393 104 435 92" fill="none" stroke="url(#gold)" stroke-width="2.5" stroke-linecap="round"/>
+    <g fill="url(#gold)" stroke="#F7D98E" stroke-width="1">
+      <path d="M345 86 v9"/><ellipse cx="345" cy="101" rx="5" ry="7"/>
+      <path d="M371 94 v9"/><ellipse cx="371" cy="109" rx="5" ry="7"/>
+      <path d="M399 98 v9"/><ellipse cx="399" cy="113" rx="5" ry="7"/>
+      <path d="M424 96 v8"/><ellipse cx="424" cy="111" rx="5" ry="7"/>
+    </g>
+
+    <!-- Gold gift bow -->
+    <path d="M325 218 C300 197 286 187 288 176 C291 160 312 162 325 190 C337 163 359 160 363 176 C367 188 347 203 325 218 Z"
+          fill="none" stroke="url(#gold)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M325 207 V255" fill="none" stroke="url(#gold)" stroke-width="11" stroke-linecap="round"/>
+    <circle cx="325" cy="202" r="7" fill="#F5D17A"/>
+  </g>
+
+  <!-- Sparkle -->
+  <path d="M483 8 C488 27 494 33 512 38 C494 43 488 49 483 68 C478 49 472 43 454 38 C472 33 478 27 483 8 Z" fill="url(#gold)"/>
+
+  <!-- Wordmark -->
+  <text x="350" y="315" text-anchor="middle"
+        font-family="Montserrat, Poppins, Arial, sans-serif"
+        font-size="57" font-weight="750" letter-spacing="-2.2">
+    <tspan fill="#4B1D5F">Decor</tspan><tspan fill="#FF765E">On</tspan><tspan fill="#4B1D5F">Demand</tspan>
+  </text>
+
+  <!-- Slogan and fine rules -->
+  <path d="M125 353 H169 M531 353 H575" stroke="url(#gold)" stroke-width="2.2" stroke-linecap="round"/>
+  <text x="350" y="361" text-anchor="middle"
+        font-family="Montserrat, Poppins, Arial, sans-serif"
+        font-size="23" font-style="italic" font-weight="500" letter-spacing=".15"
+        fill="#4B1D5F">Fulfilling Your Decor Demands</text>
+</svg>

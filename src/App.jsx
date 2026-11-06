@@ -1,6 +1,9 @@
+import Header from './components/Header.jsx'
 function App() {
   return (
-    <h1 className="text-2xl">DecorOnDemand</h1>
+    <>
+      <Header />
+    </>
   )
 }
 

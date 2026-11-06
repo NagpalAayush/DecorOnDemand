@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
+import logo from "../resources/decorondemand_logo.svg";
 
 function SearchIcon() {
   return (
@@ -26,7 +27,12 @@ function Header() {
     <header className="sticky top-0 z-30 border-b border-[#eee2d5] bg-[#fffaf5]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-5 py-4 lg:px-8">
         <Link to="/" className="shrink-0 text-xl font-black tracking-[-0.06em] text-[#d75443] sm:text-2xl">
-          decor<span className="text-[#2f2924]">on</span>demand
+          {/* Left - Logo + Location */}
+                    <img
+                        src={logo}
+                        alt="DecorOnDemand - Fulfilling Your Decor Demands"
+                        className="h-12 w-auto object-contain"
+                    />
         </Link>
 
         <button className="hidden items-center gap-2 text-left text-sm text-[#766a60] lg:flex">

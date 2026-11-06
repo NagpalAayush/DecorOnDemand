@@ -9,7 +9,6 @@
     "build:client": "vite build --outDir dist/client",
     "build:server": "vite build --ssr src/entry-server.jsx --outDir dist/server",
     "start": "node server.js",
-    "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {

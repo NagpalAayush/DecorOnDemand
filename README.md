@@ -8,6 +8,15 @@ This React app uses Vite for development and server-side rendering.
 - `npm run build` creates the browser and SSR bundles.
 - `npm start` serves the production SSR build.
 
+## Database
+
+The server creates the `decorondemand` MySQL database and its `users` table on
+startup when they do not already exist. Copy `.env.example` to `.env` and set
+your MySQL connection values before starting the server.
+
+`POST /api/users` accepts `{ "name": "...", "email": "...", "password": "..." }`. Passwords
+are stored as bcrypt hashes and are never returned by the endpoint.
+
 The server renders the initial HTML with React on every request. The browser then
 hydrates that markup using `src/main.jsx`, so existing interactive components
 continue to work after the first page load.

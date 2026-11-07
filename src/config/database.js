@@ -11,6 +11,7 @@ const connectionConfig = {
 
 let pool
 
+
 export async function initializeDatabase() {
   const connection = await mysql.createConnection(connectionConfig)
 

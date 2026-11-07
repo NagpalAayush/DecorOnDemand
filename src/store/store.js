@@ -1,10 +1,11 @@
-import {configureStore} from '@reduxjs/toolkit';
-import userReducer from '../slice/user-slice';
+import { configureStore } from '@reduxjs/toolkit'
+import userReducer from '../slice/user-slice.js'
 
-const store = configureStore({
-  reducer: {
-    user: userReducer
-  },
-});
-
-export default store;
+export function makeStore(preloadedState) {
+  return configureStore({
+    reducer: {
+      user: userReducer,
+    },
+    preloadedState,
+  })
+}

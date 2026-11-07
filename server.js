@@ -1,8 +1,12 @@
 import fs from 'node:fs/promises'
-import http from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import express from 'express'
 import { createServer as createViteServer } from 'vite'
+import { initializeDatabase } from './src/config/database.js'
+import { userRoutes } from './src/routes/userRoutes.js'
+import dotenv from 'dotenv'
+dotenv.config();
 
 const root = path.dirname(fileURLToPath(import.meta.url))
 const isProduction = process.env.NODE_ENV === 'production'
@@ -59,31 +63,55 @@ async function createApp() {
         appType: 'custom',
       })
 
-  return http.createServer(async (request, response) => {
+  const app = express()
+  app.use(express.json())
+  app.use(express.urlencoded({ extended: true }))
+  app.use('/api/users', userRoutes)
+
+  if (vite) {
+    app.use(vite.middlewares)
+  } else {
+    app.use(async (request, response, next) => {
+      try {
+        if (await serveStaticFile(request, response)) {
+          return
+        }
+
+        next()
+      } catch (error) {
+        next(error)
+      }
+    })
+  }
+
+  app.use(async (request, response, next) => {
     try {
       if (request.method !== 'GET' && request.method !== 'HEAD') {
-        response.writeHead(405, { Allow: 'GET, HEAD' })
-        response.end('Method Not Allowed')
+        response.status(405).set('Allow', 'GET, HEAD').send('Method Not Allowed')
         return
       }
 
-      if (vite) {
-        vite.middlewares(request, response, () => renderPage(request, response, vite))
-        return
-      }
-
-      if (await serveStaticFile(request, response)) {
-        return
-      }
-
-      await renderPage(request, response)
+      await renderPage(request, response, vite)
     } catch (error) {
-      vite?.ssrFixStacktrace(error)
-      console.error(error)
-      response.writeHead(500, { 'Content-Type': 'text/plain' })
-      response.end('Internal Server Error')
+      next(error)
     }
   })
+
+  app.use((error, request, response, next) => {
+    if (vite) {
+      vite.ssrFixStacktrace(error)
+    }
+
+    console.error(error)
+    if (error.type === 'entity.parse.failed') {
+      response.status(400).json({ error: 'Request body must be valid JSON.' })
+      return
+    }
+
+    response.status(500).type('text').send('Internal Server Error')
+  })
+
+  return app
 }
 
 async function renderPage(request, response, vite = null) {
@@ -105,6 +133,7 @@ async function renderPage(request, response, vite = null) {
   response.end(html)
 }
 
+await initializeDatabase()
 const server = await createApp()
 server.listen(port, () => {
   console.log(`SSR server running at http://localhost:${port}`)

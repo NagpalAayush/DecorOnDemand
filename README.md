@@ -77,6 +77,13 @@ New listings start as pending. Admins can review them through
 `PATCH /api/listings/admin/:listingId/approval`. Public listings require both
 `listing_status = 'published'` and `approval_status = 'approved'`.
 
+Bookings are stored in the `bookings` table and belong to both a user and a
+listing. Bookings represent a single decor service request rather than
+products or quantities. Authenticated users can create bookings with
+`POST /api/bookings` and view their bookings with `GET /api/bookings`.
+Bookings snapshot the listing price at creation time and start with a
+`pending` status.
+
 Admin page access is verified through the authenticated HTTP-only JWT cookie.
 The client-side Redux flag only controls navigation visibility; it is not used
 as the security boundary.

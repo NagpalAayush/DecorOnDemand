@@ -116,7 +116,6 @@ function Account() {
         </section>
         <div className="space-y-4">
           <Link to="/bookings" className="block rounded-2xl border border-[#eee2d5] bg-white p-5 font-bold transition hover:border-[#d75443]">View my bookings <span className="float-right text-[#d75443]">→</span></Link>
-          <Link to="/cart" className="block rounded-2xl border border-[#eee2d5] bg-white p-5 font-bold transition hover:border-[#d75443]">View my cart <span className="float-right text-[#d75443]">→</span></Link>
           <Link to="/change-password" className="block rounded-2xl bg-[#d75443] p-5 font-bold text-white transition hover:bg-[#bd4435]">Change password <span className="float-right">→</span></Link>
         </div>
       </div>

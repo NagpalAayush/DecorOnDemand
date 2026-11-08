@@ -7,6 +7,7 @@ import { createServer as createViteServer } from 'vite'
 import { initializeDatabase } from './src/config/database.js'
 import { userRoutes } from './src/routes/userRoutes.js'
 import { listingRoutes } from './src/routes/listingRoutes.js'
+import { bookingRoutes } from './src/routes/bookingRoutes.js'
 import { getAuthenticatedUser } from './src/auth/jwt.js'
 import dotenv from 'dotenv'
 dotenv.config();
@@ -72,6 +73,7 @@ async function createApp() {
   app.use(express.urlencoded({ extended: true }))
   app.use('/api/users', userRoutes)
   app.use('/api/listings', listingRoutes)
+  app.use('/api/bookings', bookingRoutes)
 
   if (vite) {
     app.use(vite.middlewares)
@@ -139,9 +141,6 @@ async function renderPage(request, response, vite = null) {
       user: authenticatedUser,
       isLoggedIn: Boolean(authenticatedUser),
       loading: false,
-    },
-    cart: {
-      items: [],
     },
   }
   const renderedApp = render(url, preloadedState)

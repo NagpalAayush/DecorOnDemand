@@ -115,7 +115,47 @@ export async function initializeDatabase() {
     await pool.query('ALTER TABLE listings ADD INDEX idx_listings_status (listing_status)')
   }
 
-  console.log(`Database "${databaseName}", users table, and listings table are ready.`)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS bookings (
+      id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID()),
+      user_id CHAR(36) NOT NULL,
+      listing_id CHAR(36) NOT NULL,
+      event_date DATE NOT NULL,
+      event_time TIME,
+      address VARCHAR(500) NOT NULL,
+      city VARCHAR(100),
+      notes TEXT,
+      price_at_booking DECIMAL(10, 2) NOT NULL,
+      status ENUM('pending', 'confirmed', 'rejected', 'cancelled', 'completed') NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      CONSTRAINT fk_bookings_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+      CONSTRAINT fk_bookings_listing
+        FOREIGN KEY (listing_id) REFERENCES listings(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+      INDEX idx_bookings_user_id (user_id),
+      INDEX idx_bookings_listing_id (listing_id),
+      INDEX idx_bookings_event_date (event_date),
+      INDEX idx_bookings_status (status)
+    )
+  `)
+
+  const [bookingQuantityColumns] = await pool.query(
+    `SELECT COUNT(*) AS column_count
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'bookings' AND column_name = 'quantity'`,
+    [databaseName],
+  )
+
+  if (bookingQuantityColumns[0].column_count > 0) {
+    await pool.query('ALTER TABLE bookings DROP COLUMN quantity')
+  }
+
+  console.log(`Database "${databaseName}", users, listings, and bookings tables are ready.`)
 }
 
 export function getDatabase() {

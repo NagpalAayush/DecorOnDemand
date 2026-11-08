@@ -3,7 +3,6 @@ import { Link } from 'react-router'
 import logo from "../resources/decorondemand_logo.svg";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutStart, logoutSuccess } from '../slice/user-slice.js'
-import { clearCart } from '../slice/cart-slice.js'
 import api from '../lib/api.js'
 
 function SearchIcon() {
@@ -23,7 +22,6 @@ function Header() {
   const user = useSelector((state) => state.user.user)
   const isLister = user?.isLister === true
   const isAdmin = user?.isAdmin === true
-  const cartItems = useSelector((state) => state.cart.items)
   const [query, setQuery] = useState('')
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const profileRef = useRef(null)
@@ -52,7 +50,6 @@ function Header() {
       await api.post('/api/users/signout')
     } finally {
       dispatch(logoutSuccess())
-      dispatch(clearCart())
       setIsProfileOpen(false)
     }
   }
@@ -93,10 +90,6 @@ function Header() {
               </Link>
             ) : (
               <>
-                <Link to="/cart" className="relative rounded-full border border-[#eaded2] bg-white px-4 py-2.5 text-sm font-bold text-[#2f2924]">
-                  Cart
-                  {cartItems.length > 0 && <span className="ml-2 inline-grid min-h-5 min-w-5 place-items-center rounded-full bg-[#d75443] px-1 text-[11px] text-white">{cartItems.reduce((sum, item) => sum + item.quantity, 0)}</span>}
-                </Link>
                 <div ref={profileRef} className="relative">
                   <button type="button" aria-expanded={isProfileOpen} onClick={() => setIsProfileOpen((open) => !open)} className="cursor-pointer rounded-full bg-[#d75443] px-4 py-2.5 text-sm font-bold text-white">
                     {user?.name || 'Profile'} <span className="ml-1 text-xs">▾</span>

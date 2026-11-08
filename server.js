@@ -138,6 +138,9 @@ async function renderPage(request, response, vite = null) {
       isLoggedIn: Boolean(authenticatedUser),
       loading: false,
     },
+    cart: {
+      items: [],
+    },
   }
   const renderedApp = render(url, preloadedState)
   const serializedState = JSON.stringify(preloadedState)

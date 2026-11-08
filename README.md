@@ -10,9 +10,14 @@ This React app uses Vite for development and server-side rendering.
 
 ## Database
 
-The server creates the `decorondemand` MySQL database and its `users` table on
-startup when they do not already exist. Copy `.env.example` to `.env` and set
+The server creates the `decorondemand` MySQL database, its `users` table, and
+its `listings` table on startup when they do not already exist. Copy `.env.example` to `.env` and set
 your MySQL connection values before starting the server.
+
+Each listing belongs to a user through `listings.user_id`. Listings include a
+title, description, category, decimal price, location, optional city and JSON
+images, availability status, publication status, and created/updated timestamps.
+Deleting a user also deletes that user's listings.
 
 `POST /api/users` accepts `{ "name": "...", "email": "...", "password": "..." }`. Passwords
 are stored as bcrypt hashes and are never returned by the endpoint.

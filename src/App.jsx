@@ -17,6 +17,23 @@ import AdminProtectedRoute from './components/AdminProtectedRoute.jsx'
 function App() {
   const [currentLocation, setCurrentLocation] = useState(null)
 
+  async function updateLocationFromCoordinates(latitude, longitude) {
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+    )
+    if (!response.ok) {
+      throw new Error(`Reverse geocoding failed with status ${response.status}`)
+    }
+
+    const location = await response.json()
+    const city = location.city || location.locality || location.principalSubdivision
+    if (!city) {
+      throw new Error('Unable to determine a city for this location.')
+    }
+
+    setCurrentLocation({ city, latitude, longitude })
+  }
+
   useEffect(() => {
     if (!navigator.geolocation) {
       return
@@ -25,18 +42,7 @@ function App() {
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         try {
-          const response = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coords.latitude}&longitude=${coords.longitude}&localityLanguage=en`,
-          )
-          if (!response.ok) {
-            throw new Error(`Reverse geocoding failed with status ${response.status}`)
-          }
-
-          const location = await response.json()
-          const city = location.city || location.locality || location.principalSubdivision
-          if (city) {
-            setCurrentLocation({ city, latitude: coords.latitude, longitude: coords.longitude })
-          }
+          await updateLocationFromCoordinates(coords.latitude, coords.longitude)
         } catch (error) {
           console.error('Unable to determine city from browser location:', error)
         }
@@ -50,7 +56,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#fffaf5] text-[#2f2924]">
-      <Header currentCity={currentLocation?.city} />
+      <Header
+        currentLocation={currentLocation}
+        onLocationChange={updateLocationFromCoordinates}
+      />
       <Routes>
         <Route path="/" element={<Home currentLocation={currentLocation} />} />
         <Route path="/login" element={<Login />} />

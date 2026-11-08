@@ -6,6 +6,7 @@ import Login from './pages/Login.jsx'
 import  Signup  from './pages/Signup.jsx'
 import Account from './pages/Account.jsx'
 import Bookings from './pages/Bookings.jsx'
+import BookingRequests from './pages/BookingRequests.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import MyListings from './pages/MyListings.jsx'
 import ChangePassword from './pages/ChangePassword.jsx'
@@ -67,6 +68,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
         <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
+        <Route path="/booking-requests" element={<ProtectedRoute><BookingRequests /></ProtectedRoute>} />
         <Route path="/my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/create-listing" element={<ProtectedRoute><CreateListing /></ProtectedRoute>} />

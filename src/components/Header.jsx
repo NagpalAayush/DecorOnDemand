@@ -240,6 +240,7 @@ function Header({ currentLocation, onLocationChange }) {
                     <Link to="/account" onClick={() => setIsProfileOpen(false)} className="block rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#fffaf5]">My Account</Link>
                     <Link to="/bookings" onClick={() => setIsProfileOpen(false)} className="block rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#fffaf5]">Bookings</Link>
                     {isLister && <>
+                      <Link to="/booking-requests" onClick={() => setIsProfileOpen(false)} className="block rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#fffaf5]">Booking Requests</Link>
                       <Link to="/my-listings" onClick={() => setIsProfileOpen(false)} className="block rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#fffaf5]">Show My Listings</Link>
                       <Link to="/create-listing" onClick={() => setIsProfileOpen(false)} className="block rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-[#fffaf5]">Create Listing</Link>
                     </>}

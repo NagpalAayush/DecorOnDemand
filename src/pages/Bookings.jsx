@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import api from '../lib/api.js'
+import { formatBookingDate } from '../lib/date.js'
 
 function Bookings() {
   const [bookings, setBookings] = useState([])
@@ -36,7 +37,7 @@ function Bookings() {
           {bookings.map((booking) => (
             <article key={booking.id} className="flex flex-col gap-5 rounded-2xl border border-[#eee2d5] bg-white p-5 sm:flex-row">
               {booking.listingImages?.[0] ? <img src={booking.listingImages[0]} alt={booking.listingTitle} className="h-32 w-full rounded-xl object-cover sm:w-40" /> : <div className="grid h-32 w-full place-items-center rounded-xl bg-[#f7e6d9] text-3xl sm:w-40">✨</div>}
-              <div className="flex-1"><div className="flex flex-wrap items-start justify-between gap-3"><h2 className="text-xl font-bold">{booking.listingTitle}</h2><span className="rounded-full bg-[#f7e6d9] px-3 py-1 text-xs font-semibold capitalize">{booking.status}</span></div><p className="mt-2 text-sm text-[#766a60]">Event: {new Date(`${booking.eventDate}T00:00:00`).toLocaleDateString('en-IN', { dateStyle: 'long' })}{booking.eventTime ? ` at ${booking.eventTime}` : ''}</p><p className="mt-1 text-sm text-[#766a60]">{booking.address}{booking.city ? `, ${booking.city}` : ''}</p><p className="mt-4 font-bold text-[#d75443]">₹{Number(booking.priceAtBooking).toLocaleString('en-IN')}</p></div>
+              <div className="flex-1"><div className="flex flex-wrap items-start justify-between gap-3"><h2 className="text-xl font-bold">{booking.listingTitle}</h2><span className="rounded-full bg-[#f7e6d9] px-3 py-1 text-xs font-semibold capitalize">{booking.status}</span></div><p className="mt-2 text-sm text-[#766a60]">Event: {formatBookingDate(booking.eventDate)}{booking.eventTime ? ` at ${String(booking.eventTime).slice(0, 5)}` : ''}</p><p className="mt-1 text-sm text-[#766a60]">{booking.address}{booking.city ? `, ${booking.city}` : ''}</p><p className="mt-4 font-bold text-[#d75443]">₹{Number(booking.priceAtBooking).toLocaleString('en-IN')}</p></div>
             </article>
           ))}
         </section>

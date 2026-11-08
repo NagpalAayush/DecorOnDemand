@@ -3,11 +3,12 @@ import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router'
 import { Provider } from 'react-redux'
 import App from './App.jsx'
-import store from './store/store.js'
+import { makeStore } from './store/store.js'
 import './index.css'
 
-export function render(url) {
-  
+export function render(url, preloadedState) {
+  const store = makeStore(preloadedState)
+
   return renderToString(
     createElement(
       StrictMode,

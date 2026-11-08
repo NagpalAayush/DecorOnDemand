@@ -11,6 +11,7 @@ const connectionConfig = {
 
 let pool
 
+
 export async function initializeDatabase() {
   const connection = await mysql.createConnection(connectionConfig)
 
@@ -40,7 +41,33 @@ export async function initializeDatabase() {
     )
   `)
 
-  console.log(`Database "${databaseName}" and users table are ready.`)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS listings (
+      id CHAR(36) NOT NULL PRIMARY KEY DEFAULT (UUID()),
+      user_id CHAR(36) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      category VARCHAR(100) NOT NULL,
+      price DECIMAL(10, 2) NOT NULL,
+      location VARCHAR(255) NOT NULL,
+      city VARCHAR(100),
+      images JSON,
+      availability_status ENUM('available', 'unavailable') NOT NULL DEFAULT 'available',
+      listing_status ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      CONSTRAINT fk_listings_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+      INDEX idx_listings_user_id (user_id),
+      INDEX idx_listings_category (category),
+      INDEX idx_listings_city (city),
+      INDEX idx_listings_status (listing_status, availability_status)
+    )
+  `)
+
+  console.log(`Database "${databaseName}", users table, and listings table are ready.`)
 }
 
 export function getDatabase() {

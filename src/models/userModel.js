@@ -13,5 +13,5 @@ export async function createUser(name, hashedPassword, email) {
     [id, name, hashedPassword, email, createdAt, isActive, isAdmin],
   )
 
-  return { id, name }
+  return { id, name, email, isActive, isAdmin }
 }

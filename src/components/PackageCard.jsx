@@ -1,4 +1,9 @@
+import { useDispatch } from 'react-redux'
+import { addToCart } from '../slice/cart-slice.js'
+
 function PackageCard({ item }) {
+  const dispatch = useDispatch()
+
   return (
     <article className="group min-w-[270px] flex-1">
       <div className="relative aspect-[1.12] overflow-hidden rounded-2xl bg-[#f5e8dc]">
@@ -10,6 +15,13 @@ function PackageCard({ item }) {
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#9b8c80]">{item.type}</p>
         <h3 className="mt-1 text-lg font-bold">{item.name}</h3>
         <p className="mt-2 text-sm"><b>{item.price}</b> <span className="ml-1 text-[#a99b91] line-through">{item.oldPrice}</span></p>
+        <button
+          type="button"
+          onClick={() => dispatch(addToCart(item))}
+          className="mt-4 w-full rounded-xl border border-[#d75443] px-4 py-2.5 text-sm font-bold text-[#d75443] transition hover:bg-[#d75443] hover:text-white"
+        >
+          Add to cart
+        </button>
       </div>
     </article>
   )

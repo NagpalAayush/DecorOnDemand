@@ -1,10 +1,12 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import cookieParser from 'cookie-parser'
 import express from 'express'
 import { createServer as createViteServer } from 'vite'
 import { initializeDatabase } from './src/config/database.js'
 import { userRoutes } from './src/routes/userRoutes.js'
+import { getAuthenticatedUser } from './src/auth/jwt.js'
 import dotenv from 'dotenv'
 dotenv.config();
 
@@ -64,6 +66,7 @@ async function createApp() {
       })
 
   const app = express()
+  app.use(cookieParser())
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use('/api/users', userRoutes)
@@ -128,7 +131,26 @@ async function renderPage(request, response, vite = null) {
     render = (await import('./dist/server/entry-server.js')).render
   }
 
-  const html = template.replace('<!--ssr-outlet-->', render(url))
+  const authenticatedUser = getAuthenticatedUser(request.cookies?.token)
+  const preloadedState = {
+    user: {
+      user: authenticatedUser,
+      isLoggedIn: Boolean(authenticatedUser),
+      loading: false,
+    },
+    cart: {
+      items: [],
+    },
+  }
+  const renderedApp = render(url, preloadedState)
+  const serializedState = JSON.stringify(preloadedState)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029')
+  const stateScript = `<script>window.__PRELOADED_STATE__=${serializedState}</script>`
+  const html = template.replace('<!--ssr-outlet-->', `${renderedApp}${stateScript}`)
   response.writeHead(200, { 'Content-Type': 'text/html' })
   response.end(html)
 }

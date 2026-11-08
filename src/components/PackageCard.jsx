@@ -12,6 +12,9 @@ function PackageCard({ item }) {
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#9b8c80]">{item.type}</p>
         <h3 className="mt-1 text-lg font-bold">{item.name}</h3>
         <p className="mt-2 text-sm"><b>{item.price}</b> <span className="ml-1 text-[#a99b91] line-through">{item.oldPrice}</span></p>
+        <p className="mt-2 text-xs text-[#766a60]">
+          {item.location}{item.city ? `, ${item.city}` : ''} · Serves within {Number(item.serviceRadiusKm)} km
+        </p>
         <Link
           to={`/book/${item.id}`}
           className="mt-4 block w-full rounded-xl border border-[#d75443] px-4 py-2.5 text-center text-sm font-bold text-[#d75443] transition hover:bg-[#d75443] hover:text-white"

@@ -70,11 +70,12 @@ function BookSetup() {
           <p className="mt-3 leading-7 text-[#766a60]">{listing.description || 'A thoughtfully styled setup for your celebration.'}</p>
           <p className="mt-5 text-lg font-bold text-[#d75443]">₹{Number(listing.price).toLocaleString('en-IN')}</p>
           <p className="mt-1 text-sm text-[#766a60]">{listing.location}{listing.city ? `, ${listing.city}` : ''}</p>
+          <p className="mt-2 text-sm font-semibold text-[#766a60]">Service area: within {Number(listing.serviceRadiusKm)} km of this location</p>
         </section>
         <section className="rounded-3xl border border-[#eee2d5] bg-white p-7 shadow-sm">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d75443]">Make it yours</p>
           <h2 className="mt-3 font-serif text-3xl font-semibold">Request this setup</h2>
-          <p className="mt-2 text-sm text-[#766a60]">Share your celebration details and the lister will respond to your request.</p>
+          <p className="mt-2 text-sm text-[#766a60]">Share your celebration details and the lister will respond to your request. Your event should be within the listed service area.</p>
           {error && <p className="mt-5 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
           <form onSubmit={handleSubmit} className="mt-7 space-y-4">
             <label className="block text-sm font-semibold">Event date

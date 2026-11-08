@@ -31,6 +31,7 @@ function Header({ currentLocation, onLocationChange }) {
   const [locationError, setLocationError] = useState('')
   const [isUpdatingLocation, setIsUpdatingLocation] = useState(false)
   const profileRef = useRef(null)
+  const locationRef = useRef(null)
   const locationSearchControllerRef = useRef(null)
 
   useEffect(() => {
@@ -89,12 +90,13 @@ function Header({ currentLocation, onLocationChange }) {
   }, [locationQuery])
 
   useEffect(() => {
-    function closeProfile(event) {
+    function closeOpenMenus(event) {
       if (!profileRef.current?.contains(event.target)) setIsProfileOpen(false)
+      if (!locationRef.current?.contains(event.target)) setIsLocationOpen(false)
     }
 
-    document.addEventListener('mousedown', closeProfile)
-    return () => document.removeEventListener('mousedown', closeProfile)
+    document.addEventListener('mousedown', closeOpenMenus)
+    return () => document.removeEventListener('mousedown', closeOpenMenus)
   }, [])
 
   async function handleSignout() {
@@ -163,14 +165,14 @@ function Header({ currentLocation, onLocationChange }) {
           />
         </Link>
 
-        <div className="relative hidden items-center gap-2 text-left text-sm text-[#766a60] lg:flex">
+        <div ref={locationRef} className="relative hidden items-center gap-2 text-left text-sm text-[#766a60] lg:flex">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-[#f7e6d9] text-[#d75443]">
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" strokeLinecap="round" strokeLinejoin="round" />
               <circle cx="12" cy="10" r="2.5" />
             </svg>
           </span>
-          <button type="button" onClick={() => setIsLocationOpen((open) => !open)} className="text-left">
+          <button type="button" onClick={() => setIsLocationOpen((open) => !open)} className="cursor-pointer text-left">
             <b className="block font-semibold text-[#2f2924]">Book near</b>{currentLocation?.city || 'Detecting your city...'}
           </button>
           {isLocationOpen && (
@@ -200,10 +202,10 @@ function Header({ currentLocation, onLocationChange }) {
                 </div>
               )}
               {locationError && <p className="mt-2 text-xs text-red-700">{locationError}</p>}
-              <button type="submit" disabled={isUpdatingLocation} className="mt-3 w-full rounded-xl bg-[#d75443] px-3 py-2 text-sm font-bold text-white disabled:opacity-60">
+              <button type="submit" disabled={isUpdatingLocation} className="mt-3 w-full cursor-pointer rounded-xl bg-[#d75443] px-3 py-2 text-sm font-bold text-white disabled:opacity-60">
                 {isUpdatingLocation ? 'Updating...' : 'Use this location'}
               </button>
-              <button type="button" onClick={() => navigator.geolocation?.getCurrentPosition(({ coords }) => onLocationChange(coords.latitude, coords.longitude))} className="mt-2 w-full rounded-xl border border-[#eaded2] px-3 py-2 text-sm font-semibold">
+              <button type="button" onClick={() => navigator.geolocation?.getCurrentPosition(({ coords }) => onLocationChange(coords.latitude, coords.longitude))} className="mt-2 w-full cursor-pointer rounded-xl border border-[#eaded2] px-3 py-2 text-sm font-semibold">
                 Use my current location
               </button>
             </form>

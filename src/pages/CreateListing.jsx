@@ -275,7 +275,7 @@ function CreateListing() {
               <p className="text-sm font-semibold">Service location</p>
               <p className="mt-1 text-xs text-[#766a60]">Use your current location to set the city and verify it on the map.</p>
             </div>
-            <button type="button" onClick={detectLocation} disabled={isLocating} className="rounded-xl border border-[#d75443] px-3 py-2 text-sm font-bold text-[#d75443] disabled:opacity-60">
+            <button type="button" onClick={detectLocation} disabled={isLocating} className="cursor-pointer rounded-xl border border-[#d75443] px-3 py-2 text-sm font-bold text-[#d75443] disabled:opacity-60">
               {isLocating ? 'Detecting...' : 'Use my location'}
             </button>
           </div>

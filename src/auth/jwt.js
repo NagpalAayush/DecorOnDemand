@@ -19,6 +19,7 @@ export function getAuthenticatedUser(token) {
       email: payload.email,
       isActive: payload.isActive !== false,
       isAdmin: Boolean(payload.isAdmin),
+      isLister: Boolean(payload.isLister),
     }
   } catch {
     return null

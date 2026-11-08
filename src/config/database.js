@@ -37,9 +37,21 @@ export async function initializeDatabase() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       is_active BOOLEAN DEFAULT TRUE,
-      is_admin BOOLEAN DEFAULT FALSE
+      is_admin BOOLEAN DEFAULT FALSE,
+      is_lister BOOLEAN DEFAULT FALSE
     )
   `)
+
+  const [userColumns] = await pool.query(
+    `SELECT COUNT(*) AS column_count
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'users' AND column_name = 'is_lister'`,
+    [databaseName],
+  )
+
+  if (userColumns[0].column_count === 0) {
+    await pool.query('ALTER TABLE users ADD COLUMN is_lister BOOLEAN DEFAULT FALSE')
+  }
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS listings (
@@ -52,8 +64,9 @@ export async function initializeDatabase() {
       location VARCHAR(255) NOT NULL,
       city VARCHAR(100),
       images JSON,
-      availability_status ENUM('available', 'unavailable') NOT NULL DEFAULT 'available',
       listing_status ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
+      approval_status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+      rejection_reason TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       CONSTRAINT fk_listings_user
@@ -63,9 +76,44 @@ export async function initializeDatabase() {
       INDEX idx_listings_user_id (user_id),
       INDEX idx_listings_category (category),
       INDEX idx_listings_city (city),
-      INDEX idx_listings_status (listing_status, availability_status)
+      INDEX idx_listings_status (listing_status)
     )
   `)
+
+  const [approvalColumns] = await pool.query(
+    `SELECT COUNT(*) AS column_count
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'listings' AND column_name = 'approval_status'`,
+    [databaseName],
+  )
+
+  if (approvalColumns[0].column_count === 0) {
+    await pool.query("ALTER TABLE listings ADD COLUMN approval_status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending'")
+    await pool.query('ALTER TABLE listings ADD COLUMN rejection_reason TEXT')
+  }
+
+  const [listingAvailabilityColumns] = await pool.query(
+    `SELECT COUNT(*) AS column_count
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'listings' AND column_name = 'availability_status'`,
+    [databaseName],
+  )
+
+  if (listingAvailabilityColumns[0].column_count > 0) {
+    const [availabilityIndexes] = await pool.query(
+      `SELECT COUNT(*) AS index_count
+       FROM information_schema.statistics
+       WHERE table_schema = ? AND table_name = 'listings' AND index_name = 'idx_listings_status'`,
+      [databaseName],
+    )
+
+    if (availabilityIndexes[0].index_count > 0) {
+      await pool.query('ALTER TABLE listings DROP INDEX idx_listings_status')
+    }
+
+    await pool.query('ALTER TABLE listings DROP COLUMN availability_status')
+    await pool.query('ALTER TABLE listings ADD INDEX idx_listings_status (listing_status)')
+  }
 
   console.log(`Database "${databaseName}", users table, and listings table are ready.`)
 }

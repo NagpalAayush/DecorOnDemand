@@ -31,9 +31,27 @@ const userSlice = createSlice({
             state.loading = false;
             state.isLoggedIn = false;
             state.user = null;
+        },
+        registerAsListerSuccess: (state) => {
+            if (state.user) {
+                state.user.isLister = true;
+            }
+        },
+        deregisterAsListerSuccess: (state) => {
+            if (state.user) {
+                state.user.isLister = false;
+            }
         }
     }
 });
 
-export const { loginStart, loginSuccess, loginFailure, logoutStart, logoutSuccess } = userSlice.actions;
+export const {
+    loginStart,
+    loginSuccess,
+    loginFailure,
+    logoutStart,
+    logoutSuccess,
+    registerAsListerSuccess,
+    deregisterAsListerSuccess,
+} = userSlice.actions;
 export default userSlice.reducer;

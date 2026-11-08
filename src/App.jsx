@@ -7,6 +7,11 @@ import Account from './pages/Account.jsx'
 import Bookings from './pages/Bookings.jsx'
 import Cart from './pages/Cart.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
+import MyListings from './pages/MyListings.jsx'
+import ChangePassword from './pages/ChangePassword.jsx'
+import CreateListing from './pages/CreateListing.jsx'
+import AdminListings from './pages/AdminListings.jsx'
+import AdminProtectedRoute from './components/AdminProtectedRoute.jsx'
 
 function App() {
   return (
@@ -20,6 +25,10 @@ function App() {
         <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
         <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
         <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+        <Route path="/my-listings" element={<ProtectedRoute><MyListings /></ProtectedRoute>} />
+        <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+        <Route path="/create-listing" element={<ProtectedRoute><CreateListing /></ProtectedRoute>} />
+        <Route path="/admin/listings" element={<AdminProtectedRoute><AdminListings /></AdminProtectedRoute>} />
       </Routes>
     </div>
   )

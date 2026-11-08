@@ -6,6 +6,7 @@ import express from 'express'
 import { createServer as createViteServer } from 'vite'
 import { initializeDatabase } from './src/config/database.js'
 import { userRoutes } from './src/routes/userRoutes.js'
+import { listingRoutes } from './src/routes/listingRoutes.js'
 import { getAuthenticatedUser } from './src/auth/jwt.js'
 import dotenv from 'dotenv'
 dotenv.config();
@@ -70,6 +71,7 @@ async function createApp() {
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use('/api/users', userRoutes)
+  app.use('/api/listings', listingRoutes)
 
   if (vite) {
     app.use(vite.middlewares)

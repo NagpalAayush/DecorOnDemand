@@ -22,12 +22,24 @@ function validateListingInput(body) {
     price,
     location,
     city,
+    latitude,
+    longitude,
+    serviceRadiusKm,
     images = [],
     listingStatus = 'draft',
   } = body || {}
 
   if (!isNonEmptyString(title) || !isNonEmptyString(category) || !isNonEmptyString(location)) {
     return 'title, category, and location are required.'
+  }
+
+  if (!Number.isFinite(Number(latitude)) || Number(latitude) < -90 || Number(latitude) > 90
+    || !Number.isFinite(Number(longitude)) || Number(longitude) < -180 || Number(longitude) > 180) {
+    return 'A valid map location is required.'
+  }
+
+  if (!Number.isFinite(Number(serviceRadiusKm)) || Number(serviceRadiusKm) < 1 || Number(serviceRadiusKm) > 500) {
+    return 'serviceRadiusKm must be between 1 and 500 kilometers.'
   }
 
   const numericPrice = typeof price === 'string' && price.trim() !== '' ? Number(price) : price
@@ -77,6 +89,9 @@ export async function createListingController(request, response) {
       price: typeof body.price === 'string' ? Number(body.price) : body.price,
       location: body.location.trim(),
       city: body.city?.trim(),
+      latitude: Number(body.latitude),
+      longitude: Number(body.longitude),
+      serviceRadiusKm: Number(body.serviceRadiusKm),
       images: body.images || [],
       listingStatus: body.listingStatus || 'draft',
     })
@@ -138,8 +153,28 @@ export async function getPublishedListingByIdController(request, response) {
 }
 
 export async function getPublishedListingsController(request, response) {
+  const city = typeof request.query.city === 'string' ? request.query.city.trim() : null
+  const latitude = Number(request.query.latitude)
+  const longitude = Number(request.query.longitude)
+
+  if (city && city.length > 100) {
+    response.status(400).json({ error: 'city must be 100 characters or fewer.' })
+    return
+  }
+
+  if ((request.query.latitude || request.query.longitude)
+    && (!Number.isFinite(latitude) || latitude < -90 || latitude > 90
+      || !Number.isFinite(longitude) || longitude < -180 || longitude > 180)) {
+    response.status(400).json({ error: 'A valid latitude and longitude are required.' })
+    return
+  }
+
   try {
-    const listings = await findPublishedListings()
+    const listings = await findPublishedListings({
+      city: city || null,
+      latitude: Number.isFinite(latitude) ? latitude : null,
+      longitude: Number.isFinite(longitude) ? longitude : null,
+    })
     response.json({ listings })
   } catch (error) {
     console.error('Public listing retrieval failed:', error)

@@ -10,6 +10,9 @@ const listingFields = `
   listings.price,
   listings.location,
   listings.city,
+  listings.latitude,
+  listings.longitude,
+  listings.service_radius_km AS serviceRadiusKm,
   listings.images,
   listings.listing_status AS listingStatus,
   listings.approval_status AS approvalStatus,
@@ -33,6 +36,9 @@ export async function createListing({
   price,
   location,
   city,
+  latitude,
+  longitude,
+  serviceRadiusKm,
   images,
   listingStatus,
 }) {
@@ -41,8 +47,8 @@ export async function createListing({
 
   await database.execute(
     `INSERT INTO listings
-      (id, user_id, title, description, category, price, location, city, images, listing_status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, user_id, title, description, category, price, location, city, latitude, longitude, service_radius_km, images, listing_status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
     [
       id,
       userId,
@@ -52,6 +58,9 @@ export async function createListing({
       price,
       location,
       city || null,
+      latitude,
+      longitude,
+      serviceRadiusKm,
       JSON.stringify(images),
       listingStatus,
     ],
@@ -82,14 +91,25 @@ export async function findPublishedListingsByUserId(userId) {
   return rows.map(normalizeListing)
 }
 
-export async function findPublishedListings() {
+export async function findPublishedListings({ city = null, latitude = null, longitude = null } = {}) {
   const database = getDatabase()
   const [rows] = await database.execute(
     `SELECT ${listingFields}
      FROM listings
      WHERE listings.listing_status = 'published'
        AND listings.approval_status = 'approved'
+       AND (
+         (? IS NOT NULL AND ? IS NOT NULL AND
+          6371 * 2 * ASIN(SQRT(
+            POW(SIN(RADIANS(listings.latitude - ?) / 2), 2) +
+            COS(RADIANS(?)) * COS(RADIANS(listings.latitude)) *
+            POW(SIN(RADIANS(listings.longitude - ?) / 2), 2)
+          )) <= listings.service_radius_km)
+         OR
+         (? IS NULL OR ? IS NULL) AND (? IS NULL OR LOWER(TRIM(listings.city)) = LOWER(TRIM(?)))
+       )
      ORDER BY listings.created_at DESC`,
+    [latitude, longitude, latitude, latitude, longitude, longitude, latitude, longitude, city, city],
   )
   return rows.map(normalizeListing)
 }

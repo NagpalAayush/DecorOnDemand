@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router'
 import { useSelector } from 'react-redux'
 import api from '../lib/api.js'
+import LocationMap from '../components/LocationMap.jsx'
 
 const initialForm = {
   title: '',
@@ -10,8 +11,47 @@ const initialForm = {
   price: '',
   location: '',
   city: '',
+  latitude: '',
+  longitude: '',
+  serviceRadiusKm: 10,
   images: '',
   listingStatus: 'draft',
+}
+
+const MAX_SERVICE_RADIUS_KM = 500
+const BORDER_CHECK_BEARINGS = [0, 45, 90, 135, 180, 225, 270, 315]
+
+function destinationPoint(latitude, longitude, distanceKm, bearing) {
+  const earthRadiusKm = 6371
+  const angularDistance = distanceKm / earthRadiusKm
+  const bearingRadians = (bearing * Math.PI) / 180
+  const latitudeRadians = (latitude * Math.PI) / 180
+  const longitudeRadians = (longitude * Math.PI) / 180
+  const destinationLatitude = Math.asin(
+    Math.sin(latitudeRadians) * Math.cos(angularDistance)
+      + Math.cos(latitudeRadians) * Math.sin(angularDistance) * Math.cos(bearingRadians),
+  )
+  const destinationLongitude = longitudeRadians + Math.atan2(
+    Math.sin(bearingRadians) * Math.sin(angularDistance) * Math.cos(latitudeRadians),
+    Math.cos(angularDistance) - Math.sin(latitudeRadians) * Math.sin(destinationLatitude),
+  )
+
+  return {
+    latitude: (destinationLatitude * 180) / Math.PI,
+    longitude: (destinationLongitude * 180) / Math.PI,
+  }
+}
+
+async function getCountryAtPoint(latitude, longitude) {
+  const response = await fetch(
+    `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+  )
+  if (!response.ok) {
+    throw new Error('Unable to verify the service area country.')
+  }
+
+  const location = await response.json()
+  return location.countryCode || location.countryName || null
 }
 
 function StyledSelect({ label, name, value, options, onChange }) {
@@ -64,14 +104,115 @@ function CreateListing() {
   const [form, setForm] = useState(initialForm)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLocating, setIsLocating] = useState(false)
+  const [safeRadiusKm, setSafeRadiusKm] = useState(MAX_SERVICE_RADIUS_KM)
+  const [isCheckingBorder, setIsCheckingBorder] = useState(false)
 
   if (!isLister) {
     return <Navigate to="/account" replace />
   }
 
   function handleChange(event) {
-    setForm({ ...form, [event.target.name]: event.target.value })
+    const nextForm = { ...form, [event.target.name]: event.target.value }
+    if (event.target.name === 'serviceRadiusKm') {
+      nextForm.serviceRadiusKm = Math.min(Number(event.target.value), safeRadiusKm)
+    }
+    setForm(nextForm)
   }
+
+  async function calculateSafeRadius(latitude, longitude, countryCode) {
+    setIsCheckingBorder(true)
+    try {
+      let low = 0
+      let high = MAX_SERVICE_RADIUS_KM
+
+      for (let attempt = 0; attempt < 8; attempt += 1) {
+        const candidate = (low + high) / 2
+        const points = BORDER_CHECK_BEARINGS.map((bearing) => (
+          destinationPoint(latitude, longitude, candidate, bearing)
+        ))
+        const countries = await Promise.all(
+          points.map((point) => getCountryAtPoint(point.latitude, point.longitude)),
+        )
+
+        if (countries.every((country) => country === countryCode)) {
+          low = candidate
+        } else {
+          high = candidate
+        }
+      }
+
+      const safeRadius = Math.max(1, Math.floor(low))
+      setSafeRadiusKm(safeRadius)
+      setForm((currentForm) => ({
+        ...currentForm,
+        serviceRadiusKm: Math.min(Number(currentForm.serviceRadiusKm), safeRadius),
+      }))
+    } catch (borderError) {
+      console.error('Unable to calculate country-safe radius:', borderError)
+      setSafeRadiusKm(1)
+      setForm((currentForm) => ({ ...currentForm, serviceRadiusKm: 1 }))
+      setError('Unable to verify the international border. The radius was limited to 1 km.')
+    } finally {
+      setIsCheckingBorder(false)
+    }
+  }
+
+  async function updateLocationDetails(latitude, longitude) {
+    const response = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+    )
+    if (!response.ok) throw new Error('Unable to resolve the selected location.')
+
+    const location = await response.json()
+    const city = location.city || location.locality || location.principalSubdivision
+    const countryCode = location.countryCode
+    setForm((currentForm) => ({
+      ...currentForm,
+      city: city || '',
+      latitude,
+      longitude,
+      location: location.locality || city || currentForm.location,
+    }))
+    if (countryCode) {
+      await calculateSafeRadius(latitude, longitude, countryCode)
+    }
+  }
+
+  async function handleMapLocationChange({ latitude, longitude }) {
+    setForm((currentForm) => ({ ...currentForm, latitude, longitude }))
+    try {
+      await updateLocationDetails(latitude, longitude)
+    } catch (locationError) {
+      setError(locationError.message)
+    }
+  }
+
+  async function detectLocation() {
+    if (!navigator.geolocation) {
+      setError('Your browser does not support location detection.')
+      return
+    }
+
+    setError('')
+    setIsLocating(true)
+    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+      try {
+        await updateLocationDetails(coords.latitude, coords.longitude)
+      } catch (locationError) {
+        setError(locationError.message)
+      } finally {
+        setIsLocating(false)
+      }
+    }, (locationError) => {
+      setError(locationError.message || 'Unable to access your location.')
+      setIsLocating(false)
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 })
+  }
+
+  useEffect(() => {
+    detectLocation()
+  }, [])
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -128,9 +269,34 @@ function CreateListing() {
         <label className="block text-sm font-semibold">Location
           <input name="location" value={form.location} onChange={handleChange} required placeholder="12 Park Street" className="mt-2 h-12 w-full rounded-xl border border-[#eaded2] px-4 outline-none focus:border-[#d75443]" />
         </label>
-        <label className="block text-sm font-semibold">City
-          <input name="city" value={form.city} onChange={handleChange} placeholder="New Delhi" className="mt-2 h-12 w-full rounded-xl border border-[#eaded2] px-4 outline-none focus:border-[#d75443]" />
-        </label>
+        <div className="rounded-2xl border border-[#eaded2] bg-[#fffaf5] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold">Service location</p>
+              <p className="mt-1 text-xs text-[#766a60]">Use your current location to set the city and verify it on the map.</p>
+            </div>
+            <button type="button" onClick={detectLocation} disabled={isLocating} className="rounded-xl border border-[#d75443] px-3 py-2 text-sm font-bold text-[#d75443] disabled:opacity-60">
+              {isLocating ? 'Detecting...' : 'Use my location'}
+            </button>
+          </div>
+          <label className="mt-4 block text-sm font-semibold">City
+            <input name="city" value={form.city} readOnly required placeholder="Allow location access" className="mt-2 h-12 w-full rounded-xl border border-[#eaded2] bg-white px-4 outline-none" />
+          </label>
+          {form.latitude && form.longitude && (
+            <LocationMap
+              latitude={Number(form.latitude)}
+              longitude={Number(form.longitude)}
+              radiusKm={Number(form.serviceRadiusKm)}
+              onLocationChange={handleMapLocationChange}
+            />
+          )}
+          <label className="mt-4 block text-sm font-semibold">Service radius (km)
+            <input name="serviceRadiusKm" type="range" min="1" max={safeRadiusKm} step="1" value={form.serviceRadiusKm} onChange={handleChange} disabled={isCheckingBorder} className="mt-3 w-full accent-[#d75443] disabled:opacity-50" />
+            <span className="mt-1 block text-sm font-normal text-[#766a60]">
+              {isCheckingBorder ? 'Checking the international border...' : `${form.serviceRadiusKm} km from this pin (maximum safe radius: ${safeRadiusKm} km)`}
+            </span>
+          </label>
+        </div>
         <label className="block text-sm font-semibold">Image URLs
           <textarea name="images" value={form.images} onChange={handleChange} rows="3" placeholder="Add one image URL per line" className="mt-2 w-full rounded-xl border border-[#eaded2] px-4 py-3 outline-none focus:border-[#d75443]" />
         </label>

@@ -16,7 +16,7 @@ function SearchIcon() {
 
 
 
-function Header() {
+function Header({ currentCity }) {
   const dispatch = useDispatch()
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const user = useSelector((state) => state.user.user)
@@ -25,6 +25,7 @@ function Header() {
   const [query, setQuery] = useState('')
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const profileRef = useRef(null)
+
   useEffect(() => {
     if (query) {
       const timeoutId = setTimeout(() => {
@@ -66,10 +67,10 @@ function Header() {
           />
         </Link>
 
-        <button className="hidden items-center gap-2 text-left text-sm text-[#766a60] lg:flex">
+        <div className="hidden items-center gap-2 text-left text-sm text-[#766a60] lg:flex">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-[#f7e6d9] text-[#d75443]">⌖</span>
-          <span><b className="block font-semibold text-[#2f2924]">Deliver to</b>New Delhi, India</span>
-        </button>
+          <span><b className="block font-semibold text-[#2f2924]">Book near</b>{currentCity || 'Detecting your city...'}</span>
+        </div>
 
         <div className="header-search ml-auto hidden max-w-xl flex-1 md:block">
           <SearchIcon />

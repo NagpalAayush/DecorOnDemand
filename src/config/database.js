@@ -63,6 +63,9 @@ export async function initializeDatabase() {
       price DECIMAL(10, 2) NOT NULL,
       location VARCHAR(255) NOT NULL,
       city VARCHAR(100),
+      latitude DECIMAL(10, 7),
+      longitude DECIMAL(10, 7),
+      service_radius_km DECIMAL(6, 2) NOT NULL DEFAULT 10,
       images JSON,
       listing_status ENUM('draft', 'published', 'archived') NOT NULL DEFAULT 'draft',
       approval_status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
@@ -90,6 +93,39 @@ export async function initializeDatabase() {
   if (approvalColumns[0].column_count === 0) {
     await pool.query("ALTER TABLE listings ADD COLUMN approval_status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending'")
     await pool.query('ALTER TABLE listings ADD COLUMN rejection_reason TEXT')
+  }
+
+  const [latitudeColumns] = await pool.query(
+    `SELECT COUNT(*) AS column_count
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'listings' AND column_name = 'latitude'`,
+    [databaseName],
+  )
+
+  if (latitudeColumns[0].column_count === 0) {
+    await pool.query('ALTER TABLE listings ADD COLUMN latitude DECIMAL(10, 7)')
+  }
+
+  const [longitudeColumns] = await pool.query(
+    `SELECT COUNT(*) AS column_count
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'listings' AND column_name = 'longitude'`,
+    [databaseName],
+  )
+
+  if (longitudeColumns[0].column_count === 0) {
+    await pool.query('ALTER TABLE listings ADD COLUMN longitude DECIMAL(10, 7)')
+  }
+
+  const [radiusColumns] = await pool.query(
+    `SELECT COUNT(*) AS column_count
+     FROM information_schema.columns
+     WHERE table_schema = ? AND table_name = 'listings' AND column_name = 'service_radius_km'`,
+    [databaseName],
+  )
+
+  if (radiusColumns[0].column_count === 0) {
+    await pool.query('ALTER TABLE listings ADD COLUMN service_radius_km DECIMAL(6, 2) NOT NULL DEFAULT 10')
   }
 
   const [listingAvailabilityColumns] = await pool.query(

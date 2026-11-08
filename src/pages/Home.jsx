@@ -4,7 +4,7 @@ import PackageCard from '../components/PackageCard.jsx'
 import SectionHeading from '../components/SectionHeading.jsx'
 import api from '../lib/api.js'
 
-function Home() {
+function Home({ currentLocation }) {
   const [occasion, setOccasion] = useState('Birthday')
   const [listings, setListings] = useState([])
 
@@ -13,7 +13,10 @@ function Home() {
 
     async function loadListings() {
       try {
-        const { data } = await api.get('/api/listings/published')
+        const query = currentLocation
+          ? `?city=${encodeURIComponent(currentLocation.city)}&latitude=${currentLocation.latitude}&longitude=${currentLocation.longitude}`
+          : ''
+        const { data } = await api.get(`/api/listings/published${query}`)
         if (isMounted) {
           setListings(data.listings || [])
         }
@@ -26,7 +29,7 @@ function Home() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [currentLocation])
 
   return (
     <main>
@@ -85,7 +88,7 @@ function Home() {
               />
             )) : (
               <p className="rounded-2xl border border-[#eee2d5] bg-[#fffaf5] px-5 py-8 text-sm text-[#766a60]">
-                New celebration setups are coming soon.
+                {currentLocation ? `No approved setups are available near ${currentLocation.city} yet.` : 'New celebration setups are coming soon.'}
               </p>
             )}
           </div>

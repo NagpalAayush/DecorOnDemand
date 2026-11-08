@@ -10,6 +10,7 @@ import MyListings from './pages/MyListings.jsx'
 import ChangePassword from './pages/ChangePassword.jsx'
 import CreateListing from './pages/CreateListing.jsx'
 import AdminListings from './pages/AdminListings.jsx'
+import BookSetup from './pages/BookSetup.jsx'
 import AdminProtectedRoute from './components/AdminProtectedRoute.jsx'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/create-listing" element={<ProtectedRoute><CreateListing /></ProtectedRoute>} />
         <Route path="/admin/listings" element={<AdminProtectedRoute><AdminListings /></AdminProtectedRoute>} />
+        <Route path="/book/:listingId" element={<ProtectedRoute><BookSetup /></ProtectedRoute>} />
       </Routes>
     </div>
   )

@@ -82,6 +82,30 @@ export async function findPublishedListingsByUserId(userId) {
   return rows.map(normalizeListing)
 }
 
+export async function findPublishedListings() {
+  const database = getDatabase()
+  const [rows] = await database.execute(
+    `SELECT ${listingFields}
+     FROM listings
+     WHERE listings.listing_status = 'published'
+       AND listings.approval_status = 'approved'
+     ORDER BY listings.created_at DESC`,
+  )
+  return rows.map(normalizeListing)
+}
+
+export async function findPublishedListingById(listingId) {
+  const database = getDatabase()
+  const [rows] = await database.execute(
+    `SELECT ${listingFields}
+     FROM listings
+     WHERE listings.id = ? AND listings.listing_status = 'published'
+       AND listings.approval_status = 'approved'`,
+    [listingId],
+  )
+  return rows[0] ? normalizeListing(rows[0]) : null
+}
+
 export async function findListingsForApproval() {
   const database = getDatabase()
   const [rows] = await database.execute(

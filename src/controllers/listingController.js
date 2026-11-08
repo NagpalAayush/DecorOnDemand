@@ -2,6 +2,8 @@ import {
   createListing,
   findListingsByUserId,
   findListingsForApproval,
+  findPublishedListings,
+  findPublishedListingById,
   findPublishedListingsByUserId,
   updateListingApproval,
 } from '../models/listingModel.js'
@@ -106,6 +108,38 @@ export async function getListingsByUserIdController(request, response) {
 
   try {
     const listings = await findPublishedListingsByUserId(userId)
+    response.json({ listings })
+  } catch (error) {
+    console.error('Public listing retrieval failed:', error)
+    response.status(500).json({ error: 'Unable to retrieve listings.' })
+  }
+}
+
+export async function getPublishedListingByIdController(request, response) {
+  const { listingId } = request.params
+
+  if (!listingId || listingId.length !== 36) {
+    response.status(400).json({ error: 'A valid listingId is required.' })
+    return
+  }
+
+  try {
+    const listing = await findPublishedListingById(listingId)
+    if (!listing) {
+      response.status(404).json({ error: 'Listing not found.' })
+      return
+    }
+
+    response.json({ listing })
+  } catch (error) {
+    console.error('Listing retrieval failed:', error)
+    response.status(500).json({ error: 'Unable to retrieve the listing.' })
+  }
+}
+
+export async function getPublishedListingsController(request, response) {
+  try {
+    const listings = await findPublishedListings()
     response.json({ listings })
   } catch (error) {
     console.error('Public listing retrieval failed:', error)

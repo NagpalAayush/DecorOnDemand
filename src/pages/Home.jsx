@@ -1,10 +1,32 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { categories, packages, steps } from '../data/homeData.js'
 import PackageCard from '../components/PackageCard.jsx'
 import SectionHeading from '../components/SectionHeading.jsx'
+import api from '../lib/api.js'
 
 function Home() {
   const [occasion, setOccasion] = useState('Birthday')
+  const [listings, setListings] = useState([])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadListings() {
+      try {
+        const { data } = await api.get('/api/listings/published')
+        if (isMounted) {
+          setListings(data.listings || [])
+        }
+      } catch (error) {
+        console.error('Unable to load published listings:', error)
+      }
+    }
+
+    loadListings()
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   return (
     <main>
@@ -26,7 +48,7 @@ function Home() {
               <img src="https://images.unsplash.com/photo-1464349153735-7db50ed83c84?auto=format&fit=crop&w=1200&q=90" alt="Beautifully decorated celebration table" className="h-full w-full object-cover" />
             </div>
             <div className="absolute bottom-0 left-0 rounded-2xl bg-white px-4 py-3 shadow-xl sm:left-4">
-              <p className="text-xs text-[#9b8c80]">Loved by</p><p className="font-bold">10,000+ happy hosts ✨</p>
+              <p className="text-xs text-[#9b8c80]">Launching soon</p><p className="font-bold">Made for your special moments ✨</p>
             </div>
           </div>
         </div>
@@ -49,7 +71,23 @@ function Home() {
         <div className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-24">
           <SectionHeading eyebrow="Made for your moment" title="Most-loved setups" action="See all setups" />
           <div className="flex flex-col gap-5 sm:flex-row">
-            {packages.map((item) => <PackageCard key={item.name} item={item} />)}
+            {listings.length > 0 ? listings.slice(0, 3).map((listing) => (
+              <PackageCard
+                key={listing.id}
+                item={{
+                  ...listing,
+                  name: listing.title,
+                  type: listing.category,
+                  price: `₹${Number(listing.price).toLocaleString('en-IN')}`,
+                  image: listing.images?.[0] || packages[0].image,
+                  tag: listing.approvalStatus === 'approved' ? 'Approved' : '',
+                }}
+              />
+            )) : (
+              <p className="rounded-2xl border border-[#eee2d5] bg-[#fffaf5] px-5 py-8 text-sm text-[#766a60]">
+                New celebration setups are coming soon.
+              </p>
+            )}
           </div>
         </div>
       </section>
